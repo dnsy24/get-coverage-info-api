@@ -40,9 +40,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<Customer> findAllByLastname(String lastname) {
-        List<Customer> list = customerRepository.findAllByLastname(lastname);
-        if (list.isEmpty())
-            throw new NotFoundException("Student with lastname " + lastname + " not found");
-        return list;
+        List<Customer> customerList = customerRepository.findAllByLastname(lastname);
+        if (customerList.isEmpty())
+            throw new NotFoundException("Customer with lastname " + lastname + " not found");
+        return customerList;
     }
 }
