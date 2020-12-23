@@ -1,0 +1,12 @@
+{
+  "name": "Karen",
+  "lastname": "Kristik",
+  "provider": "Afina",
+  "amount": 1205,
+  "duration": {
+    "begin_date": "2020-01-15",
+    "end_date": "2020-12-14"
+  },
+  "additional_coverage": "Eyes"
+}
+
