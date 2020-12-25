@@ -2,6 +2,7 @@ package com.example.getcoverageapi.service;
 
 import com.example.getcoverageapi.dao.CustomerRepository;
 import com.example.getcoverageapi.entity.Customer;
+import com.example.getcoverageapi.exception.BadRequestException;
 import com.example.getcoverageapi.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

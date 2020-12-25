@@ -6,6 +6,8 @@
 
 > create 2 tables with code snippet below 
 
+USE getcoverage_db;
+
 CREATE TABLE customers (
 id int NOT NULL AUTO_INCREMENT,
 name varchar(15),
@@ -13,25 +15,27 @@ lastname varchar(25),
 provider varchar(25),
 amount int,
 additional_coverage varchar(20),
-PRIMARY KEY (id)
+durations_id int,
+PRIMARY KEY (id),
+FOREIGN KEY (durations_id) references durations(id)
 );
 
 CREATE TABLE durations (
 id int NOT NULL AUTO_INCREMENT,
 begin_date varchar(25),
 end_date varchar(25),
-FOREIGN KEY (id) references customers(id)
+PRIMARY KEY (id)
 );
 
 > populate both tables with mock data with code snippet below
 
-INSERT INTO getcoverage_db.customers (name, lastname, provider, amount, additional_coverage)
+INSERT INTO getcoverage_db.customers (name, lastname, provider, amount, additional_coverage, durations_id)
 VALUES
-('Kyle', 'Reeze', 'AmeriHealth', 998, 'Dental'),
-('John', 'McLeane', 'Horizon', 1054, 'n/a'),
-('Rita', 'Shtym', 'United Health', 998, 'Eyes'),
-('Linda', 'Kvas', 'Cigna Health', 675, 'Dental'),
-('Edward', 'Pulkis', 'Humana', 1270, 'Dental');
+('Kyle', 'Reeze', 'AmeriHealth', 998, 'Dental', 1),
+('John', 'McLeane', 'Horizon', 1054, 'n/a', 2),
+('Rita', 'Shtym', 'United Health', 998, 'Eyes', 3),
+('Linda', 'Kvas', 'Cigna Health', 675, 'Dental', 4),
+('Edward', 'Pulkis', 'Humana', 1270, 'Dental', 5);
 
 INSERT INTO getcoverage_db.durations (begin_date, end_date)
 VALUES
