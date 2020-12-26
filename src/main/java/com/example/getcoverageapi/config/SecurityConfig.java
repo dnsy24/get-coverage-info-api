@@ -1,8 +1,13 @@
 package com.example.getcoverageapi.config;
 
 import com.example.getcoverageapi.model.Role;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,14 +17,22 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-//    @Value("${encoding.strength}")
-    private final int STRENGTH = 12;
+    private final UserDetailsService userDetailsService;
+
+    @Autowired( )
+    public SecurityConfig(@Qualifier("userDetailsServiceImpl") UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
+    @Value("${encoding.strength}")
+    private int STRENGTH;
 
     @Override
     protected void configure(HttpSecurity security) throws Exception {
@@ -27,34 +40,55 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/").permitAll()
-//                .antMatchers(HttpMethod.GET, "/v2/api/**").hasAuthority(Permission.BOOKING_READ.getPermission())
-//                .antMatchers(HttpMethod.POST, "/v2/api/**").hasAuthority(Permission.BOOKING_WRITE.getPermission())
-//                .antMatchers(HttpMethod.DELETE, "/v2/api/**").hasAuthority(Permission.BOOKING_WRITE.getPermission())
                 .anyRequest()
                 .authenticated()
                 .and()
-                .httpBasic();
+//                .httpBasic()
+                .formLogin()
+                .loginPage("/auth/login").permitAll()
+                .defaultSuccessUrl("/auth/success")
+                .and()
+                .logout()
+                .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout", "POST"))
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
+                .logoutSuccessUrl("/auth/login");
     }
 
-    @Bean
     @Override
-    public UserDetailsService userDetailsServiceBean() {
-        return new InMemoryUserDetailsManager(
-                User.builder()
-                        .username("admin")
-                        .password(passwordEncoder().encode("admin"))
-                        .authorities(Role.ADMIN.getAuthorities())
-                        .build(),
-                User.builder()
-                        .username("user")
-                        .password(passwordEncoder().encode("user"))
-                        .authorities(Role.USER.getAuthorities())
-                        .build()
-        );
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            auth.authenticationProvider(daoAuthenticationProvider());
+
     }
+
+//    @Bean
+//    @Override
+//    public UserDetailsService userDetailsServiceBean() {
+//        return new InMemoryUserDetailsManager(
+//                User.builder()
+//                        .username("admin")
+//                        .password(passwordEncoder().encode("admin"))
+//                        .authorities(Role.ADMIN.getAuthorities())
+//                        .build(),
+//                User.builder()
+//                        .username("user")
+//                        .password(passwordEncoder().encode("user"))
+//                        .authorities(Role.USER.getAuthorities())
+//                        .build()
+//        );
+//    }
 
     @Bean
     protected PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(STRENGTH);
+    }
+
+
+    protected DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        return daoAuthenticationProvider;
     }
 }
